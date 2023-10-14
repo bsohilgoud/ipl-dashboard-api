@@ -1,23 +1,32 @@
 package com.sohil.ipldashboard;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sohil.ipldashboard.model.Match;
+import com.sohil.ipldashboard.repository.MatchDetailsRepository;
 import com.sohil.ipldashboard.service.DataCreationService;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.JobParametersInvalidException;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,16 +40,38 @@ public class DataInitializer implements CommandLineRunner {
     DataCreationService dataCreationService;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    JobLauncher jobLauncher;
 
-    private static Logger LOG = LoggerFactory
-            .getLogger(DataInitializer.class);
+    @Autowired
+    MatchDetailsRepository matchDetailsRepository;
+
+    @Autowired
+    Job job;
+
+    private static Logger LOG = LoggerFactory.getLogger(DataInitializer.class);
+
     @Override
     public void run(String... args) throws Exception {
-        LOG.info("Trying to load data from CSV file");
-        List<Match> totalMatches = new ArrayList<>();
+        loadMatchData();
+        loadMatchDetailsData();
+    }
 
-        ObjectMapper objectMapper = new ObjectMapper();
+    private void loadMatchDetailsData() {
+        LOG.info("Calling Spring batch processing to load match details");
+        JobParameters jobParameters = new JobParametersBuilder().addLong("startedAt", System.currentTimeMillis()).toJobParameters();
+        try {
+            jobLauncher.run(job, jobParameters);
+            LOG.info("Successfully Loaded Match Details into Database with Batch Processing!!!!!!!! Count: " + matchDetailsRepository.count());
+
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException |
+                 JobParametersInvalidException e) {
+            LOG.warn("Fail to run batch processing.\n\n Exception: \n" + e.getStackTrace());
+        }
+    }
+
+    private void loadMatchData() throws IOException, ParseException {
+//        LOG.info("Trying to load data from CSV file");
+        List<Match> totalMatches = new ArrayList<>();
 
         InputStream inputStream = new ClassPathResource("IPL_Matches_2008_2022.csv", this.getClass().getClassLoader()).getInputStream();
         //        Approach - 2:
@@ -56,11 +87,10 @@ public class DataInitializer implements CommandLineRunner {
         CSVParser csvParser = new CSVParser(fileReader, CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());
 
         List<CSVRecord> records = csvParser.getRecords();
-        LOG.info("Successfully Loaded CSV data, total records is : " + records.size());
-        for (int i=0; i<records.size(); i++) {
+//        LOG.info("Successfully Loaded CSV data, total records is : " + records.size());
+        for (int i = 0; i < records.size(); i++) {
             CSVRecord record = records.get(i);
 //        for (CSVRecord record : csvParser.getRecords()){
-            LOG.info("Inside for loop");
             Match match = new Match();
 
             match.setId(Long.parseLong(record.get("Id")));
@@ -85,7 +115,7 @@ public class DataInitializer implements CommandLineRunner {
             String firstInnings;
             String secondInnings;
 
-            if(match.getTossDecision().equalsIgnoreCase("bat")) {
+            if (match.getTossDecision().equalsIgnoreCase("bat")) {
                 firstInnings = match.getTossWinner();
                 secondInnings = (match.getTeam1().equals(firstInnings)) ? match.getTeam2() : match.getTeam1();
             } else {
@@ -95,13 +125,11 @@ public class DataInitializer implements CommandLineRunner {
 
             match.setFirstInnings(firstInnings);
             match.setSecondInnings(secondInnings);
-
-            LOG.info("Adding match with ID : " + match.getId());
             totalMatches.add(match);
         }
 
-        LOG.info("Trying to load " + totalMatches.size() + " match records into ipl database");
+//        LOG.info("Trying to load " + totalMatches.size() + " match records into ipl database");
         dataCreationService.save(totalMatches);
-        LOG.info("Successfully Loaded Data into Database !!!!!!!! Hurry");
+        LOG.info("Match table loaded successfully !!!!!!!!");
     }
 }
