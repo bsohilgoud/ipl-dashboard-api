@@ -14,16 +14,17 @@ import javax.persistence.*;
 public class MatchDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long matchDetailsId;
+    @Column(name="id")
+    private Long matchCountId;
 
-    @Column(name = "id")
+    @Column(name = "match_id")
     Long id;
     @Column(name = "innings")
-    String innings;
+    int innings;
     @Column(name = "overs")
-    String overs;
-    @Column(name = "ballnumber")
-    String ballNumber;
+    Long overs;
+    @Column(name = "ball_number")
+    int ballNumber;
     @Column(name = "batter")
     String batter;
     @Column(name = "bowler")
@@ -33,21 +34,21 @@ public class MatchDetails {
     @Column(name = "extra_type")
     String extraType;
     @Column(name = "batsman_run")
-    String batsmanRun;
-    @Column(name = "extras_run")
-    String extrasRun;
+    int batsmanRun;
+    @Column(name = "extra_runs")
+    int extrasRun;
     @Column(name = "total_run")
-    String totalRun;
+    Long totalRun;
     @Column(name = "non_boundary")
     String nonBoundary;
-    @Column(name = "isWicketDelivery")
-    String isWicketDelivery;
+    @Column(name = "is_wicket_delivery")
+    int isWicketDelivery;
     @Column(name = "player_out")
     String playerOut;
     @Column(name = "kind")
     String kind;
     @Column(name = "fielders_involved")
     String fieldersInvolved;
-    @Column(name = "BattingTeam")
+    @Column(name = "batting_team")
     String BattingTeam;
 }

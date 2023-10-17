@@ -1,6 +1,5 @@
 package com.sohil.ipldashboard.config;
 
-import com.sohil.ipldashboard.DataInitializer;
 import com.sohil.ipldashboard.IpldashboardApplication;
 import com.sohil.ipldashboard.model.MatchDetails;
 import com.sohil.ipldashboard.repository.MatchDetailsRepository;
@@ -13,7 +12,6 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
 import org.springframework.batch.item.data.RepositoryItemWriter;
-import org.springframework.batch.item.database.JdbcBatchItemWriter;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
@@ -22,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
 
 @Configuration
 @AllArgsConstructor
@@ -43,11 +40,8 @@ public class SpringBatchConfig {
     FlatFileItemReader reader(){
         FlatFileItemReader flatFileItemReader = new FlatFileItemReader();
         flatFileItemReader.setLineMapper(getLineMapper());
-        //flatFileItemReader.setResource(new FileSystemResource("src/main/resources/IPL_Ball_by_Ball_2008_2022.csv"));
-        LOG.info("Trying to read the csv file.");
         flatFileItemReader.setResource(new ClassPathResource("IPL_Ball_by_Ball_2008_2022.csv", IpldashboardApplication.class.getClass().getClassLoader()));
         flatFileItemReader.setLinesToSkip(1);
-        LOG.info("Successfully read the csv file.");
 
         return flatFileItemReader;
     }
@@ -86,7 +80,8 @@ public class SpringBatchConfig {
 
     @Bean
     Step matchDetailsStep(){
-        return stepBuilderFactory.get("Match_Details_Step").allowStartIfComplete(true).<MatchDetails, MatchDetails>chunk(50000)
+//        return stepBuilderFactory.get("Match_Details_Step").allowStartIfComplete(true).<MatchDetails, MatchDetails>chunk(50000)
+        return stepBuilderFactory.get("Match_Details_Step").<MatchDetails, MatchDetails>chunk(100000)
                 .reader(reader())
                 .processor(processor())
                 .writer(writer())

@@ -46,5 +46,4 @@ public class MatchController {
         return matchService.getMatchesOfSeason(teamName, seasonNo);
     }
 
-
 }
