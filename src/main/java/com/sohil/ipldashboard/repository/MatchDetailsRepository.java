@@ -1,7 +1,9 @@
 package com.sohil.ipldashboard.repository;
 
+import com.sohil.ipldashboard.DAO.BallToBallDetailsDAO;
 import com.sohil.ipldashboard.DAO.BattingDetailsDAO;
 import com.sohil.ipldashboard.DAO.BowlingDetailsDAO;
+import com.sohil.ipldashboard.DAO.FallOfWicketsDAO;
 import com.sohil.ipldashboard.model.MatchDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -47,4 +49,34 @@ public interface MatchDetailsRepository extends JpaRepository<MatchDetails, Long
             "  AND innings = :innings" +
             "  GROUP BY bowler;", nativeQuery = true)
     List<BowlingDetailsDAO> getBowlingDetails(@Param("matchId") Long matchId, @Param("innings") int innings);
+
+
+
+    @Query(value = "SELECT" +
+            " player_out as playerOut," +
+            " overs as over," +
+            " ball_number as ballNumber," +
+            " bowler," +
+            " (CASE WHEN fielders_involved = 'NA' THEN bowler ELSE fielders_involved END) AS fieldersInvolved," +
+            " kind" +
+            " FROM match_details" +
+            " WHERE match_id = :matchId" +
+            " AND innings = :innings" +
+            " AND is_wicket_delivery = 1;", nativeQuery = true)
+    List<FallOfWicketsDAO> getFallOfWickets(@Param("matchId") Long matchId, @Param("innings") int innings);
+
+
+    @Query(value = "SELECT" +
+            " overs as over," +
+            " ball_number as ballNumber," +
+            " SUM(total_run) as runs," +
+            " SUM(SUM(total_run)) OVER (ORDER BY overs, ball_number) as score," +
+            " SUM(SUM(is_wicket_delivery)) OVER (ORDER BY overs, ball_number) as wickets" +
+            " FROM match_details" +
+            " WHERE match_id = :matchId" +
+            " AND innings = :innings" +
+            " GROUP BY overs, ball_number" +
+            " ORDER BY overs, ball_number;", nativeQuery = true)
+    List<BallToBallDetailsDAO> getBallToBallDetails(@Param("matchId") Long matchId, @Param("innings") int innings);
+
 }

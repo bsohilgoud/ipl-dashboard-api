@@ -1,7 +1,9 @@
 package com.sohil.ipldashboard.service;
 
+import com.sohil.ipldashboard.DAO.BallToBallDetailsDAO;
 import com.sohil.ipldashboard.DAO.BattingDetailsDAO;
 import com.sohil.ipldashboard.DAO.BowlingDetailsDAO;
+import com.sohil.ipldashboard.DAO.FallOfWicketsDAO;
 import com.sohil.ipldashboard.DTO.InningsDTO;
 import com.sohil.ipldashboard.repository.MatchDetailsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,19 +25,21 @@ public class MatchDetailsService {
         return matchDetailsRepository.getBowlingDetails(matchId, innings);
     }
 
-    public void getFallOfWickets(){
-
+    public List<FallOfWicketsDAO> getFallOfWickets(Long matchId, int innings){
+        return matchDetailsRepository.getFallOfWickets(matchId, innings);
     }
 
-    public void getBallToBallDetails(){
-
+    public List<BallToBallDetailsDAO> getBallToBallDetails(Long matchId, int innings){
+        return matchDetailsRepository.getBallToBallDetails(matchId, innings);
     }
 
 
     public InningsDTO getInningsDetails(Long matchId, int innings) {
         List<BattingDetailsDAO> battingDetails = getBattingDetails(matchId, innings);
         List<BowlingDetailsDAO> bowlingDetails = getBowlingDetails(matchId, innings);
+        List<FallOfWicketsDAO> fallOfWickets = getFallOfWickets(matchId, innings);
+        List<BallToBallDetailsDAO> ballToBallDetails = getBallToBallDetails(matchId, innings);
 
-        return new InningsDTO(battingDetails, bowlingDetails);
+        return new InningsDTO(battingDetails, bowlingDetails, fallOfWickets, ballToBallDetails);
     }
 }

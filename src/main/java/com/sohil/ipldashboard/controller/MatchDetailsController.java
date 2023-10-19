@@ -16,7 +16,7 @@ public class MatchDetailsController {
     @RequestMapping("/matchDetails/{matchId}")
     public MatchDetailsDTO getMatchDetails(@PathVariable Long matchId) {
         //TODO: Added for testing need to remove during deployment.
-        matchId = (matchId == -1) ? matchId : 1312200;
+        matchId = (matchId != -1) ? matchId : 1312200;
 
 //        return matchDetailsService.getBowlingDetails(matchId, 1);
 
