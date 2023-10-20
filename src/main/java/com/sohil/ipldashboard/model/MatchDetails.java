@@ -50,5 +50,5 @@ public class MatchDetails {
     @Column(name = "fielders_involved")
     String fieldersInvolved;
     @Column(name = "batting_team")
-    String BattingTeam;
+    String battingTeam;
 }

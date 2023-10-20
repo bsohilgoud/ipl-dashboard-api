@@ -2,6 +2,8 @@ package com.sohil.ipldashboard.DAO;
 
 public interface BattingDetailsDAO {
      String getBatsmanName();
+     Integer getTotalRuns();
+     Integer getStrikeRate();
      Integer getTotalBallsPlayed();
      Integer getNoOfDots();
      Integer getNoOfOnes();
@@ -10,6 +12,7 @@ public interface BattingDetailsDAO {
      Integer getNoOfFours();
      Integer getNoOfFives();
      Integer getNoOfSixes();
-     Integer getTotalBoundaries();
+     Integer noOfBoundaries();
+     Integer totalRuns();
 }
 

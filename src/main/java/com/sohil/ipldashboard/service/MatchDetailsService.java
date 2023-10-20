@@ -33,13 +33,18 @@ public class MatchDetailsService {
         return matchDetailsRepository.getBallToBallDetails(matchId, innings);
     }
 
+    public String getBattingTeamWithMatchIDAndInnings(Long matchId, int innings){
+        return matchDetailsRepository.getBattingTeamName(matchId, innings);
+    }
+
 
     public InningsDTO getInningsDetails(Long matchId, int innings) {
         List<BattingDetailsDAO> battingDetails = getBattingDetails(matchId, innings);
         List<BowlingDetailsDAO> bowlingDetails = getBowlingDetails(matchId, innings);
         List<FallOfWicketsDAO> fallOfWickets = getFallOfWickets(matchId, innings);
         List<BallToBallDetailsDAO> ballToBallDetails = getBallToBallDetails(matchId, innings);
+        String battingTeam = getBattingTeamWithMatchIDAndInnings(matchId, innings);
 
-        return new InningsDTO(battingDetails, bowlingDetails, fallOfWickets, ballToBallDetails);
+        return new InningsDTO(battingDetails, bowlingDetails, fallOfWickets, ballToBallDetails, battingTeam);
     }
 }

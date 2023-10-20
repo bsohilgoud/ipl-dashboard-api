@@ -21,4 +21,5 @@ public class InningsDTO {
     List<BowlingDetailsDAO> bowlingDetails;
     List<FallOfWicketsDAO> fallOfWickets;
     List<BallToBallDetailsDAO> ballToBallDetails;
+    String battingTeam;
 }
